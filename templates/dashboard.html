@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Equipment Bot Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Статистика -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                            Всего оборудования
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.total_equipment }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-laptop fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                            В наличии
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.available_equipment }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                            Категорий
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.categories_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-folder fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                            Брендов
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.brands_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tags fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Категории -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-folder"></i> Категории оборудования
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if stats.categories %}
+                    <div class="list-group list-group-flush">
+                        {% for category in stats.categories %}
+                        <a href="/equipment?category={{ category }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-folder-open text-primary"></i> {{ category }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Категории не найдены</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Бренды -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-tags"></i> Популярные бренды
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if stats.brands %}
+                    <div class="list-group list-group-flush">
+                        {% for brand in stats.brands %}
+                        <div class="list-group-item">
+                            <i class="fas fa-tag text-success"></i> {{ brand }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Бренды не найдены</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Быстрые действия -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bolt"></i> Быстрые действия
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="/equipment/add" class="btn btn-primary btn-block w-100">
+                            <i class="fas fa-plus"></i> Добавить оборудование
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/equipment" class="btn btn-outline-primary btn-block w-100">
+                            <i class="fas fa-list"></i> Просмотр оборудования
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/api/equipment" target="_blank" class="btn btn-outline-info btn-block w-100">
+                            <i class="fas fa-code"></i> API данных
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-success btn-block w-100" onclick="location.reload()">
+                            <i class="fas fa-sync"></i> Обновить данные
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

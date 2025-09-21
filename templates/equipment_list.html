@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Оборудование - Equipment Bot Admin{% endblock %}
+{% block page_title %}Оборудование{% endblock %}
+
+{% block page_actions %}
+<a href="/equipment/add" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Добавить оборудование
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Поиск и фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Поиск</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query or '' }}" placeholder="Название, бренд, модель...">
+            </div>
+            <div class="col-md-3">
+                <label for="category" class="form-label">Категория</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">Все категории</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Поиск
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <a href="/equipment" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Список оборудования -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list"></i> Список оборудования
+            {% if search_query or selected_category %}
+                <small class="text-muted">
+                    (фильтр: {% if search_query %}"{{ search_query }}"{% endif %}{% if search_query and selected_category %} | {% endif %}{% if selected_category %}{{ selected_category }}{% endif %})
+                </small>
+            {% endif %}
+        </h6>
+    </div>
+    <div class="card-body">
+        {% if equipment %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Категория</th>
+                            <th>Бренд</th>
+                            <th>Цена</th>
+                            <th>Наличие</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in equipment %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>
+                                <strong>{{ item.name }}</strong>
+                                {% if item.model %}
+                                    <br><small class="text-muted">{{ item.model }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ item.category }}</span>
+                            </td>
+                            <td>{{ item.brand or '-' }}</td>
+                            <td>
+                                <strong>{{ "{:,.0f}".format(item.price) }} {{ item.currency }}</strong>
+                            </td>
+                            <td>
+                                {% if item.availability %}
+                                    <span class="badge bg-success">В наличии</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Нет в наличии</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="/equipment/{{ item.id }}/edit" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            onclick="deleteEquipment({{ item.id }}, '{{ item.name }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Оборудование не найдено</h5>
+                <p class="text-muted">
+                    {% if search_query or selected_category %}
+                        Попробуйте изменить параметры поиска или 
+                        <a href="/equipment">показать все оборудование</a>
+                    {% else %}
+                        <a href="/equipment/add">Добавьте первое оборудование</a>
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить оборудование <strong id="equipmentName"></strong>?</p>
+                <p class="text-danger"><small>Это действие нельзя отменить!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteEquipment(id, name) {
+    document.getElementById('equipmentName').textContent = name;
+    document.getElementById('deleteForm').action = '/equipment/' + id + '/delete';
+    
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %}
+
